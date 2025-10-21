@@ -108,11 +108,6 @@ COPY --link deployment/start-container /usr/local/bin/start-container
 COPY --link deployment/healthcheck /usr/local/bin/healthcheck
 COPY --link composer.* ./
 
-RUN if composer show | grep spiral/roadrunner-cli >/dev/null; then \
-    ./vendor/bin/rr get-binary --quiet; else \
-    echo "`spiral/roadrunner-cli` package is not installed. Exiting..."; exit 1; \
-    fi
-
 RUN composer install \
     --no-dev \
     --no-interaction \
@@ -121,6 +116,11 @@ RUN composer install \
     --no-scripts \
     --no-progress \
     --audit
+
+RUN if composer show | grep spiral/roadrunner-cli >/dev/null; then \
+    ./vendor/bin/rr get-binary --quiet; else \
+    echo "`spiral/roadrunner-cli` package is not installed. Exiting..."; exit 1; \
+    fi
 
 COPY --link package.json bun.lock* ./
 
