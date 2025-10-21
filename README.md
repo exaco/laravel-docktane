@@ -2,14 +2,14 @@
  <h1>Laravel Docker Setup</h1>
 </div>
 <div align="center">
- <a href="/LICENSE"><img alt="License" src="https://img.shields.io/github/license/exaco/laravel-octane-dockerfile"></a>
- <a href="https://github.com/exaco/laravel-octane-dockerfile/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/exaco/laravel-octane-dockerfile"></a>
- <a href="https://github.com/exaco/laravel-octane-dockerfile/pulls"><img alt="GitHub closed pull requests" src="https://img.shields.io/github/issues-pr-closed/exaco/laravel-octane-dockerfile"></a>
+ <a href="/LICENSE"><img alt="License" src="https://img.shields.io/github/license/exaco/laravel-docktane"></a>
+ <a href="https://github.com/exaco/laravel-docktane/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/exaco/laravel-docktane"></a>
+ <a href="https://github.com/exaco/laravel-docktane/pulls"><img alt="GitHub closed pull requests" src="https://img.shields.io/github/issues-pr-closed/exaco/laravel-docktane"></a>
  <br>
- <a href="https://github.com/exaco/laravel-octane-dockerfile/actions/workflows/tests.yml"><img alt="GitHub Workflow Status" src="https://github.com/exaco/laravel-octane-dockerfile/actions/workflows/roadrunner-test.yml/badge.svg"></a>
- <a href="https://github.com/exaco/laravel-octane-dockerfile/actions/workflows/tests.yml"><img alt="GitHub Workflow Status" src="https://github.com/exaco/laravel-octane-dockerfile/actions/workflows/swoole-test.yml/badge.svg"></a>
- <a href="https://github.com/exaco/laravel-octane-dockerfile/actions/workflows/tests.yml"><img alt="GitHub Workflow Status" src="https://github.com/exaco/laravel-octane-dockerfile/actions/workflows/frankenphp-test.yml/badge.svg"></a>
- <a href="https://github.com/exaco/laravel-octane-dockerfile/actions/workflows/tests.yml"><img alt="GitHub Workflow Status" src="https://github.com/exaco/laravel-octane-dockerfile/actions/workflows/compose-test.yaml/badge.svg"></a>
+ <a href="https://github.com/exaco/laravel-docktane/actions/workflows/tests.yml"><img alt="GitHub Workflow Status" src="https://github.com/exaco/laravel-docktane/actions/workflows/roadrunner-test.yml/badge.svg"></a>
+ <a href="https://github.com/exaco/laravel-docktane/actions/workflows/tests.yml"><img alt="GitHub Workflow Status" src="https://github.com/exaco/laravel-docktane/actions/workflows/swoole-test.yml/badge.svg"></a>
+ <a href="https://github.com/exaco/laravel-docktane/actions/workflows/tests.yml"><img alt="GitHub Workflow Status" src="https://github.com/exaco/laravel-docktane/actions/workflows/frankenphp-test.yml/badge.svg"></a>
+ <a href="https://github.com/exaco/laravel-docktane/actions/workflows/tests.yml"><img alt="GitHub Workflow Status" src="https://github.com/exaco/laravel-docktane/actions/workflows/compose-test.yaml/badge.svg"></a>
 </div>
 <br>
 
@@ -74,7 +74,7 @@ This comprehensive stack provides a robust and observable environment for your p
 
 1. Clone the repository:
 ```
-git clone --depth 1 git@github.com:exaco/laravel-octane-dockerfile.git
+git clone --depth 1 git@github.com:exaco/laravel-docktane.git
 ```
 2. Copy the contents of the cloned directory, including the following items, into your Laravel project powered by Octane:
    - `deployment` directory
@@ -206,8 +206,8 @@ issue, or a PR.
 
 ## Credits
 
-- [SMortexa](https://github.com/smortexa)
-- [All contributors](https://github.com/exaco/laravel-octane-dockerfile/graphs/contributors)
+- [Mortexa](https://github.com/smortexa)
+- [All contributors](https://github.com/exaco/laravel-docktane/graphs/contributors)
 
 ## License
 
