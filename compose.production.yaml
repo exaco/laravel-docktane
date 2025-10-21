@@ -23,7 +23,6 @@ x-base: &base
     cache_from:
       - 'laravel/app:latest'
     args:
-      APP_ENV: 'production' # to load .env.production
       USER_ID: ${HOST_UID:-1000}
       GROUP_ID: ${HOST_GID:-1000}
   image: 'laravel/app:latest'

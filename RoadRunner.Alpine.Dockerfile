@@ -1,41 +1,37 @@
-ARG PHP_VERSION=8.4.12
+ARG PHP_VERSION=8.4
 ARG COMPOSER_VERSION=2.8
-ARG BUN_VERSION="latest"
-ARG ROOT="/var/www/html"
 
 FROM composer:${COMPOSER_VERSION} AS vendor
 
-FROM php:${PHP_VERSION}-cli-alpine AS base
+FROM php:${PHP_VERSION}-cli-alpine
 
-LABEL maintainer="SMortexa <seyed.me720@gmail.com>"
-LABEL org.opencontainers.image.title="Laravel Octane Dockerfile"
-LABEL org.opencontainers.image.description="Production-ready Dockerfile for Laravel Octane"
-LABEL org.opencontainers.image.source=https://github.com/exaco/laravel-octane-dockerfile
+LABEL maintainer="Mortexa <seyed.me720@gmail.com>"
+LABEL org.opencontainers.image.title="Laravel Docker Setup"
+LABEL org.opencontainers.image.description="Production-ready Docker Setup for Laravel"
+LABEL org.opencontainers.image.source=https://github.com/exaco/laravel-docktane
 LABEL org.opencontainers.image.licenses=MIT
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
-ARG TZ=UTC
-ARG ROOT
-ARG APP_ENV
 
 ENV TERM=xterm-color \
+    OCTANE_SERVER=roadrunner \
+    TZ=${TZ:-UTC} \
+    USER=laravel \
+    ROOT=/var/www/html \
+    APP_ENV=production \
+    COMPOSER_FUND=0 \
+    COMPOSER_MAX_PARALLEL_HTTP=48 \
     WITH_HORIZON=false \
     WITH_SCHEDULER=false \
-    OCTANE_SERVER=roadrunner \
-    TZ=${TZ} \
-    USER=octane \
-    APP_ENV=${APP_ENV} \
-    ROOT=${ROOT} \
-    COMPOSER_FUND=0 \
-    COMPOSER_MAX_PARALLEL_HTTP=48
+    WITH_REVERB=false
 
 WORKDIR ${ROOT}
 
 SHELL ["/bin/sh", "-eou", "pipefail", "-c"]
 
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
-  && echo ${TZ} > /etc/timezone
+    && echo ${TZ} > /etc/timezone
 
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
@@ -52,6 +48,7 @@ RUN apk update; \
     ca-certificates \
     supervisor \
     libsodium-dev \
+    && curl -fsSL https://bun.sh/install | BUN_INSTALL=/usr ash \
     && install-php-extensions \
     apcu \
     bz2 \
@@ -69,7 +66,7 @@ RUN apk update; \
     gd \
     redis \
     rdkafka \
-    memcached \
+    ffi \
     ldap \
     && docker-php-source delete \
     && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
@@ -82,7 +79,7 @@ RUN arch="$(apk --print-arch)" \
     x86) _cronic_fname='supercronic-linux-386' ;; \
     *) echo >&2 "error: unsupported architecture: $arch"; exit 1 ;; \
     esac \
-    && wget -q "https://github.com/aptible/supercronic/releases/download/v0.2.29/${_cronic_fname}" \
+    && wget -q "https://github.com/aptible/supercronic/releases/download/v0.2.38/${_cronic_fname}" \
     -O /usr/bin/supercronic \
     && chmod +x /usr/bin/supercronic \
     && mkdir -p /etc/supercronic \
@@ -97,27 +94,20 @@ RUN mkdir -p /var/log/supervisor /var/run/supervisor \
 
 RUN cp ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini
 
-USER ${USER}
+COPY --link --from=vendor /usr/bin/composer /usr/bin/composer
+COPY --link deployment/supervisord.conf /etc/
+COPY --link deployment/octane/RoadRunner/supervisord.roadrunner.conf /etc/supervisor/conf.d/
+COPY --link deployment/supervisord.*.conf /etc/supervisor/conf.d/
+COPY --link deployment/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
+COPY --link deployment/octane/RoadRunner/.rr.prod.yaml ./.rr.yaml
+COPY --link deployment/start-container /usr/local/bin/start-container
+COPY --link deployment/healthcheck /usr/local/bin/healthcheck
+COPY --link composer.* ./
 
-COPY --link --chown=${USER_ID}:${GROUP_ID} --from=vendor /usr/bin/composer /usr/bin/composer
-
-COPY --link --chown=${USER_ID}:${GROUP_ID} deployment/supervisord.conf /etc/
-COPY --link --chown=${USER_ID}:${GROUP_ID} deployment/octane/RoadRunner/supervisord.roadrunner.conf /etc/supervisor/conf.d/
-COPY --link --chown=${USER_ID}:${GROUP_ID} deployment/supervisord.*.conf /etc/supervisor/conf.d/
-COPY --link --chown=${USER_ID}:${GROUP_ID} deployment/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
-COPY --link --chown=${USER_ID}:${GROUP_ID} deployment/octane/RoadRunner/.rr.prod.yaml ./.rr.yaml
-COPY --link --chown=${USER_ID}:${GROUP_ID} deployment/start-container /usr/local/bin/start-container
-COPY --link --chown=${USER_ID}:${GROUP_ID} deployment/healthcheck /usr/local/bin/healthcheck
-
-RUN chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck
-
-###########################################
-
-FROM base AS common
-
-USER ${USER}
-
-COPY --link --chown=${USER_ID}:${GROUP_ID} . .
+RUN if composer show | grep spiral/roadrunner-cli >/dev/null; then \
+    ./vendor/bin/rr get-binary --quiet; else \
+    echo "`spiral/roadrunner-cli` package is not installed. Exiting..."; exit 1; \
+    fi
 
 RUN composer install \
     --no-dev \
@@ -125,37 +115,14 @@ RUN composer install \
     --no-autoloader \
     --no-ansi \
     --no-scripts \
+    --no-progress \
     --audit
-
-###########################################
-# Build frontend assets with Bun
-###########################################
-
-FROM oven/bun:${BUN_VERSION} AS build
-
-ARG ROOT
-
-WORKDIR ${ROOT}
 
 COPY --link package.json bun.lock* ./
 
 RUN bun install --frozen-lockfile
 
-COPY --link --from=common ${ROOT} .
-
-RUN bun run build
-
-###########################################
-
-FROM common AS runner
-
-USER ${USER}
-
-ENV WITH_HORIZON=false \
-    WITH_SCHEDULER=false \
-    WITH_REVERB=false
-
-COPY --link --chown=${USER_ID}:${GROUP_ID} --from=build ${ROOT}/public public
+COPY --link . .
 
 RUN mkdir -p \
     storage/framework/sessions \
@@ -165,19 +132,16 @@ RUN mkdir -p \
     storage/logs \
     bootstrap/cache \
     && chown -R ${USER_ID}:${GROUP_ID} ${ROOT} \
-    && chmod -R a+rw ${ROOT}
+    && chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck rr
 
 RUN composer dump-autoload \
     --optimize \
     --apcu \
     --no-dev
 
-RUN if composer show | grep spiral/roadrunner-cli >/dev/null; then \
-    ./vendor/bin/rr get-binary --quiet; else \
-    echo "`spiral/roadrunner-cli` package is not installed. Exiting..."; exit 1; \
-    fi
+RUN bun run build
 
-RUN chmod +x rr
+USER ${USER}
 
 EXPOSE 8000
 EXPOSE 6001
@@ -185,4 +149,4 @@ EXPOSE 8080
 
 ENTRYPOINT ["start-container"]
 
-HEALTHCHECK --start-period=5s --interval=2s --timeout=5s --retries=8 CMD healthcheck || exit 1
+HEALTHCHECK --start-period=5s --interval=1s --timeout=3s --retries=10 CMD healthcheck || exit 1
