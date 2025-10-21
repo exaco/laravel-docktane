@@ -103,7 +103,7 @@ RUN cp ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini
 USER ${USER}
 
 COPY --link --from=vendor /usr/bin/composer /usr/bin/composer
-COPY --link deployment/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
+COPY --link deployment/php.ini ${PHP_INI_DIR}/conf.d/99-php.ini
 COPY --link composer.* ./
 
 RUN composer install \

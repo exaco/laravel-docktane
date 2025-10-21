@@ -116,7 +116,7 @@ COPY --link deployment/octane/FrankenPHP/supervisord.frankenphp.conf /etc/superv
 COPY --link deployment/supervisord.*.conf /etc/supervisor/conf.d/
 COPY --link deployment/start-container /usr/local/bin/start-container
 COPY --link deployment/healthcheck /usr/local/bin/healthcheck
-COPY --link deployment/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
+COPY --link deployment/php.ini ${PHP_INI_DIR}/conf.d/99-php.ini
 COPY --link composer.* ./
 
 RUN composer install \

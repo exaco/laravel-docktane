@@ -96,7 +96,7 @@ COPY --link --from=vendor /usr/bin/composer /usr/bin/composer
 COPY --link deployment/supervisord.conf /etc/
 COPY --link deployment/octane/RoadRunner/supervisord.roadrunner.conf /etc/supervisor/conf.d/
 COPY --link deployment/supervisord.*.conf /etc/supervisor/conf.d/
-COPY --link deployment/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
+COPY --link deployment/php.ini ${PHP_INI_DIR}/conf.d/99-php.ini
 COPY --link deployment/octane/RoadRunner/.rr.prod.yaml ./.rr.yaml
 COPY --link deployment/start-container /usr/local/bin/start-container
 COPY --link deployment/healthcheck /usr/local/bin/healthcheck
