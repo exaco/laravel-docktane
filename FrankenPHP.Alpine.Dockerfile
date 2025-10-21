@@ -34,7 +34,7 @@ ARG GROUP_ID=1000
 
 ENV TERM=xterm-color \
     OCTANE_SERVER=frankenphp \
-    TZ=${TZ:-UTC} \
+    TZ=UTC \
     USER=laravel \
     ROOT=/var/www/html \
     APP_ENV=production \
