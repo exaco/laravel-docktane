@@ -71,7 +71,6 @@ RUN apt-get update; \
     ca-certificates \
     supervisor \
     libsodium-dev \
-    postgresql-client-${POSTGRES_VERSION:-17} \
     && curl -fsSL https://bun.sh/install | BUN_INSTALL=/usr bash \
     && install-php-extensions \
     apcu \
