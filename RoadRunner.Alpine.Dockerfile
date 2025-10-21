@@ -114,11 +114,6 @@ RUN composer install \
     --no-progress \
     --audit
 
-RUN if composer show | grep spiral/roadrunner-cli >/dev/null; then \
-    ./vendor/bin/rr get-binary --quiet; else \
-    echo "`spiral/roadrunner-cli` package is not installed. Exiting..."; exit 1; \
-    fi
-
 COPY --link package.json bun.lock* ./
 
 RUN bun install --frozen-lockfile
@@ -139,6 +134,11 @@ RUN composer dump-autoload \
     --optimize \
     --apcu \
     --no-dev
+
+RUN if composer show | grep spiral/roadrunner-cli >/dev/null; then \
+    ./vendor/bin/rr get-binary --quiet; else \
+    echo "`spiral/roadrunner-cli` package is not installed. Exiting..."; exit 1; \
+    fi
 
 RUN bun run build
 
