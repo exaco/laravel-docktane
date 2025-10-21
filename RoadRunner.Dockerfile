@@ -128,7 +128,7 @@ RUN mkdir -p \
     storage/logs \
     bootstrap/cache \
     && chown -R ${USER_ID}:${GROUP_ID} ${ROOT} \
-    && chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck rr
+    && chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck
 
 RUN composer dump-autoload \
     --optimize \
@@ -136,7 +136,7 @@ RUN composer dump-autoload \
     --no-dev
 
 RUN if composer show | grep spiral/roadrunner-cli >/dev/null; then \
-    ./vendor/bin/rr get-binary --quiet; else \
+    ./vendor/bin/rr get-binary --quiet && chmod +x rr; else \
     echo "`spiral/roadrunner-cli` package is not installed. Exiting..."; exit 1; \
     fi
 
