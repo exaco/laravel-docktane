@@ -13,11 +13,12 @@ LABEL org.opencontainers.image.licenses=MIT
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
+ARG TZ=UTC
 
 ENV DEBIAN_FRONTEND=noninteractive \
     TERM=xterm-color \
     OCTANE_SERVER=roadrunner \
-    TZ=UTC \
+    TZ=${TZ} \
     USER=laravel \
     ROOT=/var/www/html \
     APP_ENV=production \

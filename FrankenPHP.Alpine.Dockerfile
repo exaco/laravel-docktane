@@ -31,10 +31,11 @@ LABEL org.opencontainers.image.licenses=MIT
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
+ARG TZ=UTC
 
 ENV TERM=xterm-color \
     OCTANE_SERVER=frankenphp \
-    TZ=UTC \
+    TZ=${TZ} \
     USER=laravel \
     ROOT=/var/www/html \
     APP_ENV=production \
