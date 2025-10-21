@@ -48,7 +48,10 @@ RUN apk update; \
     ca-certificates \
     supervisor \
     libsodium-dev \
-    && curl -fsSL https://bun.sh/install | BUN_INSTALL=/usr sh \
+    && curl -fsSL https://bun.sh/install -o /tmp/install-bun.sh \
+    && chmod +x /tmp/install-bun.sh \
+    && BUN_INSTALL=/usr /tmp/install-bun.sh \
+    && rm /tmp/install-bun.sh \
     && install-php-extensions \
     apcu \
     bz2 \
