@@ -3,7 +3,7 @@ ARG COMPOSER_VERSION=2.8
 
 FROM composer:${COMPOSER_VERSION} AS vendor
 
-FROM php:${PHP_VERSION}-cli-alpine
+FROM php:${PHP_VERSION}-cli-bookworm-alpine
 
 LABEL maintainer="Mortexa <seyed.me720@gmail.com>"
 LABEL org.opencontainers.image.title="Laravel Docker Setup"
