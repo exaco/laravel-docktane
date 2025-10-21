@@ -91,10 +91,6 @@ RUN arch="$(apk --print-arch)" \
 RUN addgroup -g ${GROUP_ID} ${USER} \
     && adduser -D -G ${USER} -u ${USER_ID} -s /bin/sh ${USER}
 
-RUN mkdir -p /var/log/supervisor /var/run/supervisor \
-    && chown -R ${USER_ID}:${GROUP_ID} ${ROOT} /var/log /var/run \
-    && chmod -R a+rw ${ROOT} /var/log /var/run
-
 RUN cp ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini
 
 COPY --link --from=vendor /usr/bin/composer /usr/bin/composer
