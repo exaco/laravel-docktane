@@ -153,7 +153,7 @@ To deploy your application stack with Docker Compose:
 
 * You can use the `APP_ENV` build argument to specify a different environment file.
 
-### Recommended `Swoole` options in `octane.php`
+### Recommended options in `octane.php`
 
 ```php
 // config/octane.php
@@ -170,7 +170,13 @@ return [
             'document_root' => public_path(),
             'enable_static_handler' => true,
         ]
-    ]
+    ],
+
+    // https://github.com/laravel/octane/pull/853#issuecomment-1999530137
+    'state_file' => base_path('bootstrap/octane-server-state.json'),
+
+    // https://github.com/laravel/octane/pull/902/files
+    'usleep_between_writing_server_output' => 1,
 ];
 ```
 
