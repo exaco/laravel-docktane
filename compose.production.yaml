@@ -43,7 +43,7 @@ x-base: &base
 services:
   traefik:
     profiles: [app]
-    image: traefik:v3.5
+    image: traefik:v3.6
     restart: unless-stopped
     stop_grace_period: 35s
     ulimits:
