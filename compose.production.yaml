@@ -201,7 +201,7 @@ services:
       traefik.enable: false
   pgsql:
     profiles: [app]
-    image: 'postgres:${POSTGRES_VERSION:-17}-alpine'
+    image: 'postgres:${POSTGRES_VERSION:-18}-alpine'
     ulimits:
       nofile:
         soft: 65536
@@ -216,7 +216,7 @@ services:
       POSTGRES_PASSWORD: '${DB_PASSWORD}'
     volumes:
       # - './postgresql.conf:/etc/postgresql/postgresql.conf'
-      - 'stack-pgsql:/var/lib/postgresql/data'
+      - 'stack-pgsql:/var/lib/postgresql'
       - '../backup:/backup'
     networks:
       - stack
