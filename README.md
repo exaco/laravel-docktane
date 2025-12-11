@@ -27,7 +27,7 @@ The setup is optimized for performance and includes multi-stage builds to create
 - **Comprehensive Docker Compose:** Includes a production-ready `compose.production.yaml` to orchestrate the full application stack.
 
 
-## Laravel Container modes
+## Container modes
 
 Easily launch your container in different modes to handle specific tasks:
 
