@@ -9,13 +9,13 @@ x-healthcheck: &default-healthcheck
   retries: 10
   timeout: 3s
 x-base: &base
-  profiles: [app]
+  profiles: [ app ]
   depends_on:
     pgbouncer:
       condition: service_started
     redis:
       condition: service_healthy
-    minio:
+    rustfs:
       condition: service_healthy
   build:
     context: .
@@ -42,7 +42,7 @@ x-base: &base
   restart: unless-stopped
 services:
   traefik:
-    profiles: [app]
+    profiles: [ app ]
     image: traefik:v3.6
     restart: unless-stopped
     stop_grace_period: 35s
@@ -72,7 +72,8 @@ services:
       - "--entryPoints.app-secure.transport.lifeCycle.graceTimeOut=30s"
       - "--entryPoints.pgadmin.address=:6053"
       - "--entryPoints.pghero.address=:6660"
-      - "--entryPoints.minio-console.address=:8900"
+      - "--entryPoints.rustfs.address=:9000"
+      - "--entryPoints.rustfs-console.address=:9001"
       - "--entryPoints.netdata.address=:19999"
       - "--entryPoints.prometheus.address=:9090"
       - "--entryPoints.grafana.address=:3000"
@@ -83,7 +84,8 @@ services:
       - "443:443/udp" # HTTP/3
       - "127.0.0.1:6053:6053" # pgAdmin
       - "127.0.0.1:6660:6660" # PgHero
-      - "127.0.0.1:8900:8900" # MinIO console
+      - "127.0.0.1:9000:9000" # RustFS
+      - "127.0.0.1:9001:9001" # RustFS console
       - "127.0.0.1:19999:19999" # NetData
       - "127.0.0.1:9090:9090" # Prometheus
       - "127.0.0.1:3000:3000" # Grafana
@@ -97,9 +99,7 @@ services:
       traefik.http.routers.traefik.rule: Host(`localhost`)
       traefik.http.routers.traefik.service: api@internal
       traefik.http.routers.traefik.entryPoints: traefik
-      traefik.http.routers.traefik.middlewares: "traefik-auth,traefik-retry"
-      traefik.http.middlewares.traefik-retry.retry.attempts: 4
-      traefik.http.middlewares.traefik-retry.retry.initialinterval: 100ms
+      traefik.http.routers.traefik.middlewares: traefik-auth
       traefik.http.middlewares.traefik-auth.basicauth.removeheader: true
       traefik.http.middlewares.traefik-auth.basicauth.users: "${TRAEFIK_AUTH_USERS:-user:$$2y$$05$$8zbpsdxg9wDiiKdqxiB0zeAlxZtG68P1SDBOvCN4IooLFewLx70Gm}"
   app:
@@ -115,7 +115,7 @@ services:
       traefik.http.routers.app-secure.priority: 10
       traefik.http.routers.app-secure.service: app-service
       traefik.http.routers.app-secure.tls: true
-      traefik.http.routers.app-secure.middlewares: "app-retry,app-compress,security-headers"
+      traefik.http.routers.app-secure.middlewares: security-headers
       traefik.http.services.app-service.loadbalancer.server.port: 8000 # Because container exposes multiple ports
       traefik.http.services.app-service.loadbalancer.healthCheck.path: "/up"
       traefik.http.services.app-service.loadbalancer.healthCheck.hostname: "localhost"
@@ -123,9 +123,6 @@ services:
       traefik.http.services.app-service.loadbalancer.healthCheck.interval: 2s
       traefik.http.services.app-service.loadbalancer.healthCheck.timeout: 5s
       traefik.http.middlewares.limit.buffering.maxRequestBodyBytes: 560000000 # 560mb
-      traefik.http.middlewares.app-retry.retry.attempts: 4
-      traefik.http.middlewares.app-retry.retry.initialinterval: 100ms
-      traefik.http.middlewares.app-compress.compress: true
       traefik.http.middlewares.security-headers.headers.accesscontrolmaxage: 100
       traefik.http.middlewares.security-headers.headers.addvaryheader: true # Vary: Origin
       traefik.http.middlewares.security-headers.headers.hostsproxyheaders: X-Forwarded-Host
@@ -161,13 +158,10 @@ services:
       traefik.http.routers.reverb.entryPoints: app-secure
       traefik.http.routers.reverb.priority: 30
       traefik.http.routers.reverb.tls: true
-      traefik.http.routers.reverb.middlewares: "reverb-retry"
-      traefik.http.middlewares.reverb-retry.retry.attempts: 4
-      traefik.http.middlewares.reverb-retry.retry.initialinterval: 100ms
       traefik.http.routers.reverb.service: reverb-service
       traefik.http.services.reverb-service.loadbalancer.server.port: 8080
   redis:
-    profiles: [app]
+    profiles: [ app ]
     image: 'redis:7-alpine'
     ulimits:
       nofile:
@@ -200,7 +194,7 @@ services:
     labels:
       traefik.enable: false
   pgsql:
-    profiles: [app]
+    profiles: [ app ]
     image: 'postgres:${POSTGRES_VERSION:-18}-alpine'
     ulimits:
       nofile:
@@ -252,7 +246,7 @@ services:
     labels:
       traefik.enable: false
   pgadmin:
-    profiles: [administration]
+    profiles: [ administration ]
     image: 'dpage/pgadmin4:latest'
     security_opt:
       - no-new-privileges:true
@@ -273,13 +267,11 @@ services:
       traefik.enable: true
       traefik.http.routers.pgadmin.rule: Host(`localhost`)
       traefik.http.routers.pgadmin.entryPoints: pgadmin
-      traefik.http.routers.pgadmin.middlewares: "pgadmin-auth,pgadmin-retry"
-      traefik.http.middlewares.pgadmin-retry.retry.attempts: 4
-      traefik.http.middlewares.pgadmin-retry.retry.initialinterval: 100ms
+      traefik.http.routers.pgadmin.middlewares: pgadmin-auth
       traefik.http.middlewares.pgadmin-auth.basicauth.removeheader: true
       traefik.http.middlewares.pgadmin-auth.basicauth.users: "user:$$2y$$05$$8zbpsdxg9wDiiKdqxiB0zeAlxZtG68P1SDBOvCN4IooLFewLx70Gm" # user:123456
   pghero:
-    profiles: [administration]
+    profiles: [ administration ]
     image: ankane/pghero
     security_opt:
       - no-new-privileges:true
@@ -297,15 +289,13 @@ services:
       traefik.enable: true
       traefik.http.routers.pghero.rule: Host(`localhost`)
       traefik.http.routers.pghero.entryPoints: pghero
-      traefik.http.routers.pghero.middlewares: "pghero-auth,pghero-retry"
-      traefik.http.middlewares.pghero-retry.retry.attempts: 4
-      traefik.http.middlewares.pghero-retry.retry.initialinterval: 100ms
+      traefik.http.routers.pghero.middlewares: pghero-auth
       traefik.http.middlewares.pghero-auth.basicauth.removeheader: true
       traefik.http.middlewares.pghero-auth.basicauth.users: "user:$$2y$$05$$8zbpsdxg9wDiiKdqxiB0zeAlxZtG68P1SDBOvCN4IooLFewLx70Gm" # user:123456
       traefik.http.routers.pghero.service: pghero-service
       traefik.http.services.pghero-service.loadbalancer.server.port: 6660
   typesense:
-    profiles: [app]
+    profiles: [ app ]
     image: 'typesense/typesense:29.0'
     security_opt:
       - no-new-privileges:true
@@ -325,7 +315,7 @@ services:
     labels:
       traefik.enable: false
   backup:
-    profiles: [administration]
+    profiles: [ administration ]
     image: offen/docker-volume-backup:v2
     security_opt:
       - no-new-privileges:true
@@ -347,45 +337,55 @@ services:
       - /etc/localtime:/etc/localtime:ro
     labels:
       traefik.enable: false
-  minio:
-    profiles: [app]
-    image: 'minio/minio:latest'
+  rustfs:
+    profiles: [ app ]
+    image: 'rustfs/rustfs:latest'
     security_opt:
       - no-new-privileges:true
     environment:
-      MINIO_ROOT_USER: '${MINIO_ROOT_USER}'
-      MINIO_ROOT_PASSWORD: '${MINIO_ROOT_PASSWORD}'
+      RUSTFS_VOLUMES: '/data'
+      RUSTFS_ADDRESS: '0.0.0.0:9000'
+      RUSTFS_CONSOLE_ADDRESS: '0.0.0.0:9001'
+      RUSTFS_CONSOLE_ENABLE: 'true'
+      RUSTFS_EXTERNAL_ADDRESS: ':9000'
+      RUSTFS_CORS_ALLOWED_ORIGINS: '*'
+      RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS: '*'
+      RUSTFS_ACCESS_KEY: '${RUSTFS_ACCESS_KEY}'
+      RUSTFS_SECRET_KEY: '${RUSTFS_SECRET_KEY}'
+      RUSTFS_LOG_LEVEL: 'info'
     volumes:
-      - 'stack-minio:/data/minio'
+      - 'stack-rustfs:/data'
     networks:
       - stack
-    command: 'minio server /data/minio --console-address ":8900"'
     restart: unless-stopped
     logging: *default-logging
+    healthcheck:
+      test: [
+        "CMD",
+        "sh", "-c",
+        "curl -f http://127.0.0.1:9000/health && curl -f http://127.0.0.1:9001/health"
+      ]
+      <<: *default-healthcheck
     labels:
       traefik.enable: true
-      traefik.http.routers.minio-console.rule: Host(`localhost`)
-      traefik.http.routers.minio-console.entryPoints: minio-console
-      traefik.http.routers.minio-console.service: minio-console-service
-      traefik.http.routers.minio-console.middlewares: "minio-auth,minio-retry"
-      traefik.http.services.minio-console-service.loadbalancer.server.port: 8900
-      traefik.http.routers.minio.rule: (Host(`localhost`) || Host(`app.docker.localhost`)) && PathPrefix(`/${AWS_BUCKET}`)
-      traefik.http.routers.minio.entryPoints: app-secure
-      traefik.http.routers.minio.priority: 20
-      traefik.http.routers.minio.tls: true
-      traefik.http.routers.minio.service: minio-service
-      traefik.http.routers.minio.middlewares: "minio-retry,minio-compress"
-      traefik.http.services.minio-service.loadbalancer.server.port: 9000
-      traefik.http.middlewares.minio-compress.compress: true
-      traefik.http.middlewares.minio-retry.retry.attempts: 4
-      traefik.http.middlewares.minio-retry.retry.initialinterval: 100ms
-      traefik.http.middlewares.minio-auth.basicauth.removeheader: true
-      traefik.http.middlewares.minio-auth.basicauth.users: "user:$$2y$$05$$8zbpsdxg9wDiiKdqxiB0zeAlxZtG68P1SDBOvCN4IooLFewLx70Gm" # user:123456
-    healthcheck:
-      test: [ "CMD", "mc", "ready", "local" ]
-      <<: *default-healthcheck
+      traefik.http.routers.rustfs-console.rule: Host(`localhost`)
+      traefik.http.routers.rustfs-console.entryPoints: rustfs-console
+      traefik.http.routers.rustfs-console.service: rustfs-console-service
+      traefik.http.routers.rustfs-console.middlewares: rustfs-auth
+      traefik.http.services.rustfs-console-service.loadbalancer.server.port: 9001
+      traefik.http.routers.rustfs-server.rule: Host(`localhost`)
+      traefik.http.routers.rustfs-server.entryPoints: rustfs
+      traefik.http.routers.rustfs-server.service: rustfs-service
+      traefik.http.routers.rustfs.rule: (Host(`localhost`) || Host(`app.docker.localhost`)) && PathPrefix(`/${AWS_BUCKET}`)
+      traefik.http.routers.rustfs.entryPoints: app-secure
+      traefik.http.routers.rustfs.priority: 20
+      traefik.http.routers.rustfs.tls: true
+      traefik.http.routers.rustfs.service: rustfs-service
+      traefik.http.services.rustfs-service.loadbalancer.server.port: 9000
+      traefik.http.middlewares.rustfs-auth.basicauth.removeheader: true
+      traefik.http.middlewares.rustfs-auth.basicauth.users: "user:$$2y$$05$$8zbpsdxg9wDiiKdqxiB0zeAlxZtG68P1SDBOvCN4IooLFewLx70Gm" # user:123456
   netdata:
-    profiles: [administration]
+    profiles: [ administration ]
     image: netdata/netdata
     restart: unless-stopped
     cap_add:
@@ -418,7 +418,7 @@ services:
       traefik.http.middlewares.netdata-auth.basicauth.removeheader: true
       traefik.http.middlewares.netdata-auth.basicauth.users: "user:$$2y$$05$$8zbpsdxg9wDiiKdqxiB0zeAlxZtG68P1SDBOvCN4IooLFewLx70Gm" # user:123456
   prometheus:
-    profiles: [administration]
+    profiles: [ administration ]
     image: prom/prometheus:v3.4.2
     restart: unless-stopped
     logging: *default-logging
@@ -444,7 +444,7 @@ services:
       traefik.http.middlewares.prometheus-auth.basicauth.removeheader: true
       traefik.http.middlewares.prometheus-auth.basicauth.users: "user:$$2y$$05$$8zbpsdxg9wDiiKdqxiB0zeAlxZtG68P1SDBOvCN4IooLFewLx70Gm"
   grafana:
-    profiles: [administration]
+    profiles: [ administration ]
     image: grafana/grafana:12.0.2
     restart: unless-stopped
     logging: *default-logging
@@ -479,7 +479,7 @@ volumes:
     driver: local
   stack-pgadmin:
     driver: local
-  stack-minio:
+  stack-rustfs:
     driver: local
   stack-typesense:
     driver: local

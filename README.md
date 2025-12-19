@@ -52,7 +52,7 @@ The orchestrated containers include:
 - **Database:** A PostgreSQL container for your application's database.
 - **PgBouncer:** Lightweight connection pooler for PostgreSQL.
 - **Redis:** An in-memory data store used for caching and as a message broker for Laravel Horizon.
-- **Minio:** An S3-compatible object storage service, perfect for handling file uploads and storage.
+- **RustFS:** RustFS is a high-performance, distributed object storage system built in Rust.
 - **Typesense:** A fast, typo-tolerant, and open-source search engine for building powerful search functionality into your application.
 - **pgAdmin & pghero:** Web-based tools for managing your PostgreSQL database and monitoring its performance.
 - **Backup Service:** A container that performs automated backups of your database to ensure data safety.
