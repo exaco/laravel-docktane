@@ -1,0 +1,47 @@
+name: 'Setup PHP with Composer and extensions'
+description: 'Sets up PHP with specified extensions and Composer'
+
+inputs:
+  php-version:
+    description: 'PHP version'
+    required: false
+    default: '8.5'
+  extensions:
+    description: 'PHP extensions'
+    required: false
+    default: 'dom, curl, libxml, mbstring, zip'
+  tools:
+    description: 'Tools to install'
+    required: false
+    default: 'composer:v2'
+  coverage:
+    description: 'Coverage driver'
+    required: false
+    default: 'none'
+  cache-key:
+    description: 'Cache key for Composer dependencies'
+    required: false
+    default: '${{ runner.os }}-composer'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php-version }}
+        extensions: ${{ inputs.extensions }}
+        tools: ${{ inputs.tools }}
+        coverage: ${{ inputs.coverage }}
+
+    - name: Get Composer cache directory
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Cache PHP dependencies
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ inputs.cache-key }}
+        restore-keys: "${{ runner.os }}-composer-"
