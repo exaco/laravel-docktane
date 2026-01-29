@@ -100,6 +100,9 @@ docker run -e CONTAINER_MODE=scheduler --rm <image-name>:<tag>
 # Reverb mode
 docker run -e CONTAINER_MODE=reverb --rm <image-name>:<tag>
 
+# SSR mode
+docker run -e CONTAINER_MODE=ssr --rm <image-name>:<tag>
+
 # HTTP mode with Horizon
 docker run -e WITH_HORIZON=true -p <port>:8000 --rm <image-name>:<tag>
 
@@ -113,11 +116,12 @@ docker run \
     -p <port>:8000 \
     --rm <image-name>:<tag>
 
-# HTTP mode with Scheduler, Horizon and Reverb
+# HTTP mode with Scheduler, Horizon, Reverb and SSR
 docker run \
     -e WITH_SCHEDULER=true \
     -e WITH_HORIZON=true \
     -e WITH_REVERB=true \
+    -e WITH_SSR=true \
     -p <port>:8000 \
     --rm <image-name>:<tag>
 
