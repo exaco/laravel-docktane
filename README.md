@@ -15,14 +15,11 @@
 
 A production-ready Docker setup for running high-performance Laravel applications with Laravel Octane. This repository provides Dockerfiles and a comprehensive Docker Compose configuration for various Octane drivers, including Swoole, RoadRunner, and FrankenPHP.
 
-The setup is optimized for performance and includes multi-stage builds to create lean final images.
-
 ## Key Features
 
 - **Multiple Drivers:** Dockerfiles available for Swoole, RoadRunner, and FrankenPHP.
 - **Production-Ready:** Optimized for a production environment with best practices.
-- **Multi-Stage Builds:** Creates smaller, more secure Docker images by separating build dependencies from the final runtime image.
-- **Container Modes:** Easily run your container in different modes for handling web requests (`http`), queues (`horizon`), scheduled tasks (`scheduler`), custom worker (`worker`), or WebSocket server (`reverb`).
+- **Container Modes:** Easily run your container in different modes for handling web requests (`http`), queues (`horizon`), scheduled tasks (`scheduler`), custom worker (`worker`), WebSocket server (`reverb`), or Inertia SSR server (`ssr`).
 - **Extensible:** Simple to customize for your specific application needs.
 - **Comprehensive Docker Compose:** Includes a production-ready `compose.production.yaml` to orchestrate the full application stack.
 
@@ -39,7 +36,7 @@ Easily launch your container in different modes to handle specific tasks:
 | Scheduler             | `scheduler`      | Executes scheduled tasks at defined intervals.        |
 | Worker                | `worker`         | A dedicated worker for background processing.        |
 | Reverb                | `reverb`         | Facilitates real-time communication with Laravel Echo.        |
-| Inertia SSR Server    | `ssr`         | Runs the Inertia SSR server with `bun` runtime        |
+| Inertia SSR Server    | `ssr`         | Runs the Inertia SSR server with `bun` runtime.        |
 
 ## Production-Ready Docker Compose
 
