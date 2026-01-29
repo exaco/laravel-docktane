@@ -148,6 +148,12 @@ services:
       CONTAINER_MODE: scheduler
     labels:
       traefik.enable: false
+  inertia:
+    <<: *base
+    environment:
+      CONTAINER_MODE: ssr
+    labels:
+      traefik.enable: false
   reverb:
     <<: *base
     environment:
