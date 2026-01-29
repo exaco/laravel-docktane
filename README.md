@@ -39,6 +39,7 @@ Easily launch your container in different modes to handle specific tasks:
 | Scheduler             | `scheduler`      | Executes scheduled tasks at defined intervals.        |
 | Worker                | `worker`         | A dedicated worker for background processing.        |
 | Reverb                | `reverb`         | Facilitates real-time communication with Laravel Echo.        |
+| Inertia SSR Server    | `ssr`         | Runs the Inertia SSR server with `bun` runtime        |
 
 ## Production-Ready Docker Compose
 

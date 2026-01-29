@@ -44,7 +44,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     COMPOSER_MAX_PARALLEL_HTTP=48 \
     WITH_HORIZON=false \
     WITH_SCHEDULER=false \
-    WITH_REVERB=false
+    WITH_REVERB=false \
+    WITH_SSR=false
 
 ENV XDG_CONFIG_HOME=${ROOT}/.config XDG_DATA_HOME=${ROOT}/.data
 

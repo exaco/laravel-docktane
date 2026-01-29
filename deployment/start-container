@@ -2,7 +2,6 @@
 set -e
 
 container_mode=${CONTAINER_MODE:-"http"}
-octane_server=${OCTANE_SERVER}
 running_migrations_and_seeders=${RUNNING_MIGRATIONS_AND_SEEDERS:-"false"}
 
 initialStuff() {
@@ -21,33 +20,41 @@ if [ "$1" != "" ]; then
     exec "$@"
 elif [ "${container_mode}" = "http" ]; then
     initialStuff
-    echo "Octane Server: $octane_server"
-    if [ "${octane_server}"  = "frankenphp" ]; then
-        exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.frankenphp.conf
-    elif [ "${octane_server}"  = "swoole" ]; then
-        exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.swoole.conf
-    elif [ "${octane_server}"  = "roadrunner" ]; then
-        exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.roadrunner.conf
+    echo "Octane Server: $OCTANE_SERVER"
+
+    if [ "$(php artisan tinker --execute="echo config('inertia.ssr.enabled');")" = "1" ]; then
+        echo "Inertia SSR Server url: $(php artisan tinker --execute="echo config('inertia.ssr.url');")"
+    fi
+    
+    if [ "${OCTANE_SERVER}" = "frankenphp" ]; then
+        exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.frankenphp.conf
+    elif [ "${OCTANE_SERVER}" = "swoole" ]; then
+        exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.swoole.conf
+    elif [ "${OCTANE_SERVER}" = "roadrunner" ]; then
+        exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.roadrunner.conf
     else
         echo "Invalid Octane server supplied."
         exit 1
     fi
 elif [ "${container_mode}" = "horizon" ]; then
     initialStuff
-    exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.horizon.conf
+    exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.horizon.conf
 elif [ "${container_mode}" = "reverb" ]; then
     initialStuff
-    exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.reverb.conf
+    exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.reverb.conf
+elif [ "${container_mode}" = "ssr" ]; then
+    initialStuff
+    exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.inertia.conf
 elif [ "${container_mode}" = "scheduler" ]; then
     initialStuff
-    exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.scheduler.conf
+    exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.scheduler.conf
 elif [ "${container_mode}" = "worker" ]; then
     if [ -z "${WORKER_COMMAND}" ]; then
         echo "WORKER_COMMAND is undefined."
         exit 1
     fi
     initialStuff
-    exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.worker.conf
+    exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.worker.conf
 else
     echo "Container mode mismatched."
     exit 1
