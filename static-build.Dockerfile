@@ -124,8 +124,7 @@ COPY --link . .
 RUN mkdir -p \
     storage/framework/{sessions,views,cache,testing} \
     storage/logs \
-    bootstrap/cache \
-    && chown -R ${USER_ID}:${GROUP_ID} ${ROOT}
+    bootstrap/cache
 
 RUN composer dump-autoload \
     --optimize \
@@ -133,6 +132,8 @@ RUN composer dump-autoload \
     --no-dev
 
 RUN bun run build
+
+RUN chown -R ${USER_ID}:${GROUP_ID} ${ROOT}
 
 ###########################################
 

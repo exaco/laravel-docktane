@@ -129,7 +129,6 @@ RUN mkdir -p \
     storage/framework/{sessions,views,cache,testing} \
     storage/logs \
     bootstrap/cache \
-    && chown -R ${USER_ID}:${GROUP_ID} ${ROOT} \
     && chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck
 
 RUN composer dump-autoload \
@@ -143,6 +142,8 @@ RUN if composer show | grep spiral/roadrunner-cli >/dev/null; then \
     fi
 
 RUN bun run build
+
+RUN chown -R ${USER_ID}:${GROUP_ID} ${ROOT}
 
 USER ${USER}
 
