@@ -145,7 +145,8 @@ RUN if composer show | grep spiral/roadrunner-cli >/dev/null; then \
 
 RUN bun run build
 
-RUN chown -R ${USER_ID}:${GROUP_ID} ${ROOT}
+RUN chown -R ${USER_ID}:${GROUP_ID} ${ROOT} \
+    && find / -perm /6000 -type f -exec chmod a-s {} + 2>/dev/null || true
 
 USER ${USER}
 
