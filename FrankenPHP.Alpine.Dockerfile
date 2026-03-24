@@ -39,6 +39,7 @@ ENV TERM=xterm-color \
     USER=laravel \
     ROOT=/var/www/html \
     APP_ENV=production \
+    COMPOSER_ALLOW_SUPERUSER=1 \
     COMPOSER_FUND=0 \
     COMPOSER_MAX_PARALLEL_HTTP=48 \
     WITH_HORIZON=false \
