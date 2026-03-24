@@ -37,6 +37,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     TERM=xterm-color \
     OCTANE_SERVER=frankenphp \
     TZ=${TZ} \
+    LANG=C.UTF-8 \
     USER=laravel \
     ROOT=/var/www/html \
     APP_ENV=production \

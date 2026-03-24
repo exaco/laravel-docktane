@@ -18,6 +18,7 @@ ARG TZ=UTC
 ENV TERM=xterm-color \
     OCTANE_SERVER=roadrunner \
     TZ=${TZ} \
+    LANG=C.UTF-8 \
     USER=laravel \
     ROOT=/var/www/html \
     APP_ENV=production \
