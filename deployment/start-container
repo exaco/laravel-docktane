@@ -22,6 +22,12 @@ elif [ "${container_mode}" = "http" ]; then
     initialStuff
     echo "Octane Server: $OCTANE_SERVER"
 
+    # Octane's own defaults, also when a variable is set but empty.
+    # supervisord refuses to start on a %(ENV_...)s that is not defined.
+    export OCTANE_WORKERS="${OCTANE_WORKERS:-auto}"
+    export OCTANE_TASK_WORKERS="${OCTANE_TASK_WORKERS:-auto}"
+    export OCTANE_MAX_REQUESTS="${OCTANE_MAX_REQUESTS:-500}"
+
     if [ "$(php artisan tinker --execute="echo config('inertia.ssr.enabled');")" = "1" ]; then
         echo "Inertia SSR Server url: $(php artisan tinker --execute="echo config('inertia.ssr.url');")"
     fi
