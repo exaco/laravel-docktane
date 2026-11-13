@@ -155,6 +155,26 @@ To deploy your application stack with Docker Compose:
 
 * You can use the `APP_ENV` build argument to specify a different environment file.
 
+### Octane workers
+
+In `http` mode, these environment variables set the matching options of the Octane server command:
+
+| Variable              | Default | Option           | Servers                        |
+| --------------------- | ------- | ---------------- | ------------------------------ |
+| `OCTANE_WORKERS`      | `auto`  | `--workers`      | FrankenPHP, Swoole, RoadRunner |
+| `OCTANE_TASK_WORKERS` | `auto`  | `--task-workers` | Swoole                         |
+| `OCTANE_MAX_REQUESTS` | `500`   | `--max-requests` | FrankenPHP, Swoole, RoadRunner |
+
+The defaults are Octane's own. A variable that is unset or empty takes its default.
+
+`auto` sizes the pool from the CPUs the container can see: two workers per CPU with FrankenPHP (from the cgroup CPU quota when one is set, otherwise the host's CPUs), one per CPU with Swoole and RoadRunner. Each worker keeps a booted application in memory and, once it has used the database, an open connection. On a large host, or behind a connection limit, set a fixed number:
+
+```bash
+docker run -e OCTANE_WORKERS=4 -p <port>:8000 --rm <image-name>:<tag>
+```
+
+Set these variables in the container's environment (`docker run -e`, `environment:` in Compose), not in `.env.production`: supervisord reads them before Laravel loads its environment file.
+
 ### Recommended options in `octane.php`
 
 ```php
